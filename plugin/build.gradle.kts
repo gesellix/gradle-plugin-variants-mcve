@@ -9,6 +9,7 @@
 plugins {
   // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins
   `java-gradle-plugin`
+  `maven-publish`
 }
 
 repositories {
@@ -45,4 +46,27 @@ val functionalTest by tasks.registering(Test::class) {
 tasks.check {
   // Run the functional tests as part of `check`
   dependsOn(functionalTest)
+}
+
+val gradle7 = sourceSets.create("gradle7")
+java {
+  registerFeature(gradle7.name) {
+    usingSourceSet(gradle7)
+    capability(project.group.toString(), project.name, project.version.toString())
+  }
+}
+configurations.configureEach {
+  if (isCanBeConsumed && name.startsWith(gradle7.name)) {
+    attributes {
+      attribute(GradlePluginApiVersion.GRADLE_PLUGIN_API_VERSION_ATTRIBUTE, objects.named("7.0"))
+    }
+  }
+}
+tasks.named<Copy>(gradle7.processResourcesTaskName) {
+  val copyPluginDescriptors = rootSpec.addChild()
+  copyPluginDescriptors.into("META-INF/gradle-plugins")
+  copyPluginDescriptors.from(tasks.pluginDescriptors)
+}
+dependencies {
+  "gradle7CompileOnly"(gradleApi())
 }
