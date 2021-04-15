@@ -1,0 +1,1 @@
+defaultTasks = mutableListOf(":consumer:greeting")

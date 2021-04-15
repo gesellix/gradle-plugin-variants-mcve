@@ -9,3 +9,4 @@
 
 rootProject.name = "gradle-plugin-variants-mcve"
 include("plugin")
+include("consumer")
